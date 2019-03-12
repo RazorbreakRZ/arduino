@@ -4,6 +4,8 @@
 // PIN declaration
 #define PIN_PIEZO			3
 #define PIN_SERVO			5
+#define PIN_SWITCH_MASTER	6
+#define PIN_SWITCH_AUTO		7
 #define PIN_SONAR_ECHO		9
 #define PIN_SONAR_TRIGGER	10
 
@@ -20,7 +22,9 @@
 
 // Switches
 boolean switchMaster = false;
+boolean lastMasterState = false;
 boolean switchAuto = false;
+boolean lastAutoState = false;
 
 // Controllers
 boolean turnLeft = false;
@@ -41,40 +45,78 @@ boolean servoDirection = 1; // 0:left 1:right
 // Data vars
 byte flags = 0;
 int angle = 0;
+int lastAngle = 0;
 int distance = 0;
+int lastDistance = 0;
+
 
 // Initial function
 void setup() {  
 	doNoise(5000, 50, 150, 1);
 	Serial.begin(9600);
 	randomSeed(analogRead(0));
+	pinMode(PIN_SWITCH_MASTER, INPUT);
+	pinMode(PIN_SWITCH_AUTO, INPUT);
 	pinMode(PIN_SONAR_TRIGGER, OUTPUT);
 	pinMode(PIN_SONAR_ECHO, INPUT);
 	myServo.attach(PIN_SERVO);
-	setServoAngle(SERVO_CENTER_ANGLE);
+	servoResetPosition();
 	doNoise(5000, 50, 150, 2);
 }
 
 // Main loop
 void loop() {
-	getCurrentStatus();
+	updateCurrentStatus();
+	checkChanges();
 	if(switchMaster) {
-		doStep();
+		// MASTER on
+		if(switchAuto) {
+			// AUTO mode
+			doStep();
+			updateServoAngle();
+		} else {
+			// MANUAL mode
+			doStep();
+			// TODO: implement here manual control
+		}
 	} else {
+		// MASTER off
+		startPosition();
 		sendSerialData();
 	}
 }
 
-void getCurrentStatus() {
-	// TODO: Implement main controller here. The result must be encoded in 'flags' var
+void updateCurrentStatus() {
+	// Save last status before change
+	lastMasterState = switchMaster;
+	lastAutoState = switchAuto;
+	// Read and save current status
+	switchMaster = digitalRead(PIN_SWITCH_MASTER);
+	switchAuto = digitalRead(PIN_SWITCH_AUTO);
+}
+
+void checkChanges() {
+	// Set SERVO to position 0 if MASTER change its status to ON
+	if(switchMaster && !lastMasterState) {
+		setServoAngle(SERVO_MIN_ANGLE);
+	}
+}
+
+void servoStartPosition() {
+	setServoAngle(SERVO_MIN_ANGLE);
+	lastAngle = SERVO_MIN_ANGLE;
+}
+
+void servoResetPosition() {
+	setServoAngle(SERVO_CENTER_ANGLE);
+	lastAngle = SERVO_CENTER_ANGLE;
 }
 
 void doStep() {
 	setServoAngle(angle)
 	delay(30);
-	getSonarDistance()
+	doPulse()
 	sendSerialData();
-	updateServoAngle();
 }
 
 void sendSerialData() {
@@ -101,11 +143,13 @@ void updateServoAngle() {
 	}
 }
 
-void setServoAngle(int angle) {
-	myServo.write(angle);
+void setServoAngle(int newAngle) {
+	myServo.write(newAngle);
+	lastAngle = angle;
+	angle = newAngle;
 }
 
-void getSonarDistance() {
+void doPulse() {
 	long duration = 0;
 	digitalWrite(PIN_SONAR_TRIGGER, LOW);
 	delayMicroseconds(2);
@@ -113,13 +157,14 @@ void getSonarDistance() {
 	delayMicroseconds(10);
 	digitalWrite(PIN_SONAR_TRIGGER, LOW);
 	duration = pulseIn(PIN_SONAR_ECHO, HIGH);
+	lastDistance = distance
 	distance = duration * 0.034 / 2;
 }
 
 void doNoise(int frequency, int duration, int wait, int times) {
 	for(int i=0; i<times; i++) {
 		tone(PIN_PIEZO, frequency, duration);
-		if(wait>0) {
+		if(wait > 0) {
 			delay(wait);
 		}
   	}
