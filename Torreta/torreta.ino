@@ -1,53 +1,49 @@
 #include <math.h>
 #include <Servo.h>
 
-// PIN declaration
-#define PIN_PIEZO			3
-#define PIN_SERVO			5
-#define PIN_SWITCH_MASTER	6
-#define PIN_SWITCH_AUTO		7
-#define PIN_SONAR_ECHO		9
-#define PIN_SONAR_TRIGGER	10
-
 // SERVO configuration
-#define SERVO_MIN_ANGLE			0	//Servo minimun angle value
-#define SERVO_CENTER_ANGLE		90	//Servo angle centered
-#define SERVO_MAX_ANGLE			180	//Servo maximun angle value
-#define SERVO_STEP				1	//Servo step size (in degrees)
-#define SERVO_START_POSITION	0	//Servo start angle
-
-// PIEZO configuration
-#define PIEZO_MIN_FREQ  100		//Buzzer minimun working frequency
-#define PIEZO_MAX_FREQ  50000	//Buzzer maximun audible working frequency
-
-// Switches
-boolean switchMaster = false;
-boolean lastMasterState = false;
-boolean switchAuto = false;
-boolean lastAutoState = false;
-
-// Controllers
-boolean turnLeft = false;
-boolean turnRight = false;
-
-// Buttons
-boolean buttonFire1 = false;
-boolean buttonFire2 = false;
-boolean buttonFire3 = false;
-boolean buttonFire4 = false;
-
-// Global vars
+const int PIN_SERVO 			= 4;
+const int SERVO_MIN_ANGLE 		= 0;	//Servo minimun angle value
+const int SERVO_CENTER_ANGLE 	= 90;	//Servo angle centered
+const int SERVO_MAX_ANGLE 		= 180;	//Servo maximun angle value
+const int SERVO_STEP 			= 1;	//Servo step size (in degrees)
+const int SERVO_START_POSITION 	= 0;	//Servo start angle
+bool servoDirection 			= 1;	// 0:left 1:right
+int angle 						= 0;
+int lastAngle 					= 0;
 Servo myServo;
 
-// State vars
-boolean servoDirection = 1; // 0:left 1:right
+// SONAR configuration
+const int PIN_SONAR_TRIGGER 	= 5;
+const int PIN_SONAR_ECHO 		= 6;
+int distance 					= 0;
+int lastDistance 				= 0;
 
-// Data vars
+// PIEZO configuration
+const int PIN_PIEZO 			= 3;
+const int PIEZO_MIN_FREQ 		= 100;		//Buzzer minimun working frequency
+const int PIEZO_MAX_FREQ 		= 50000;	//Buzzer maximun audible working frequency
+
+// Switches
+const int PIN_SWITCH_MASTER 	= 1;
+bool switchMaster 				= false;
+bool lastMasterState 			= false;
+const int PIN_SWITCH_AUTO 		= 2;
+bool switchAuto 				= false;
+bool lastAutoState 				= false;
+
+// Controllers
+const int PIN_BUTTON_LEFT 		= 7;
+bool turnLeft 					= false;
+const int PIN_BUTTON_RIGHT 		= 8;
+bool turnRight 					= false;
+
+// Launchers
+const int PIN_LAUNCHERS 		= [ 9, 10, 11, 12 ];
+bool enabledLaunchers 			= [ false, false, false, false ];
+
+// Data
 byte flags = 0;
-int angle = 0;
-int lastAngle = 0;
-int distance = 0;
-int lastDistance = 0;
 
 
 // Initial function
@@ -57,9 +53,12 @@ void setup() {
 	randomSeed(analogRead(0));
 	pinMode(PIN_SWITCH_MASTER, INPUT);
 	pinMode(PIN_SWITCH_AUTO, INPUT);
+	myServo.attach(PIN_SERVO);
 	pinMode(PIN_SONAR_TRIGGER, OUTPUT);
 	pinMode(PIN_SONAR_ECHO, INPUT);
-	myServo.attach(PIN_SERVO);
+	pinMode(PIN_BUTTON_LEFT, INPUT);
+	pinMode(PIN_BUTTON_RIGHT, INPUT);
+	configureLaunchers();
 	servoResetPosition();
 	doNoise(5000, 50, 150, 2);
 }
@@ -100,6 +99,17 @@ void checkChanges() {
 	if(switchMaster && !lastMasterState) {
 		setServoAngle(SERVO_MIN_ANGLE);
 	}
+}
+
+void configureLaunchers() {
+	pinMode(PIN_LAUNCHER_1, OUTPUT);
+	pinMode(PIN_LAUNCHER_2, OUTPUT);
+	pinMode(PIN_LAUNCHER_3, OUTPUT);
+	pinMode(PIN_LAUNCHER_4, OUTPUT);
+	digitalWrite(PIN_LAUNCHER_1, launcher1Enabled);
+	digitalWrite(PIN_LAUNCHER_2, launcher2Enabled);
+	digitalWrite(PIN_LAUNCHER_3, launcher3Enabled);
+	digitalWrite(PIN_LAUNCHER_4, launcher4Enabled);
 }
 
 void servoStartPosition() {
