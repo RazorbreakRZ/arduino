@@ -2,6 +2,7 @@
 #define __PROG_TYPES_COMPAT__
 
 #include <stdint.h>
+#include <math.h>
 
 #include "FastLED.h"
 
@@ -234,6 +235,8 @@ CRGB& nblend( CRGB& existing, const CRGB& overlay, fract8 amountOfOverlay )
         return existing;
     }
 
+#if 0
+    // Old blend method which unfortunately had some rounding errors
     fract8 amountOfKeep = 255 - amountOfOverlay;
 
     existing.red   = scale8_LEAVING_R1_DIRTY( existing.red,   amountOfKeep)
@@ -244,7 +247,13 @@ CRGB& nblend( CRGB& existing, const CRGB& overlay, fract8 amountOfOverlay )
                     + scale8_LEAVING_R1_DIRTY( overlay.blue,   amountOfOverlay);
 
     cleanup_R1();
-
+#else
+    // Corrected blend method, with no loss-of-precision rounding errors
+    existing.red   = blend8( existing.red,   overlay.red,   amountOfOverlay);
+    existing.green = blend8( existing.green, overlay.green, amountOfOverlay);
+    existing.blue  = blend8( existing.blue,  overlay.blue,  amountOfOverlay);
+#endif
+    
     return existing;
 }
 
@@ -444,7 +453,7 @@ CRGB HeatColor( uint8_t temperature)
     // Scale 'heat' down from 0-255 to 0-191,
     // which can then be easily divided into three
     // equal 'thirds' of 64 units each.
-    uint8_t t192 = scale8_video( temperature, 192);
+    uint8_t t192 = scale8_video( temperature, 191);
 
     // calculate a value that ramps up from
     // zero to 255 in each 'third' of the scale.
@@ -921,7 +930,7 @@ CHSV ColorFromPalette( const struct CHSVPalette16& pal, uint8_t index, uint8_t b
         uint8_t deltaHue = (uint8_t)(hue2 - hue1);
         if( deltaHue & 0x80 ) {
           // go backwards
-          hue1 -= scale8( 255 - deltaHue, f2);
+          hue1 -= scale8( 256 - deltaHue, f2);
         } else {
           // go forwards
           hue1 += scale8( deltaHue, f2);
@@ -1011,7 +1020,7 @@ CHSV ColorFromPalette( const struct CHSVPalette32& pal, uint8_t index, uint8_t b
         uint8_t deltaHue = (uint8_t)(hue2 - hue1);
         if( deltaHue & 0x80 ) {
             // go backwards
-            hue1 -= scale8( 255 - deltaHue, f2);
+            hue1 -= scale8( 256 - deltaHue, f2);
         } else {
             // go forwards
             hue1 += scale8( deltaHue, f2);

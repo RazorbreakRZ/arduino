@@ -123,12 +123,24 @@ public:
 		//cli();
 		if(b & (1 << BIT)) {
 			FastPin<DATA_PIN>::hi();
+#ifdef ESP32
+			// try to ensure we never have adjacent write opcodes to the same register
+			FastPin<CLOCK_PIN>::lo();
+			FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY; 
+			FastPin<CLOCK_PIN>::toggle(); CLOCK_LO_DELAY; 
+#else
 			FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
 			FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
+#endif
 		} else {
 			FastPin<DATA_PIN>::lo();
 			FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
+#ifdef ESP32
+			// try to ensure we never have adjacent write opcodes to the same register
+			FastPin<CLOCK_PIN>::toggle(); CLOCK_HI_DELAY; 
+#else
 			FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
+#endif
 		}
 		//sei();
 	}
@@ -158,7 +170,7 @@ private:
 			FastPin<CLOCK_PIN>::fastset(clockpin, hiclock); CLOCK_HI_DELAY;
 			FastPin<CLOCK_PIN>::fastset(clockpin, loclock); CLOCK_LO_DELAY;
 		} else {
-			// NOP;
+			// FL_NOP;
 			FastPin<DATA_PIN>::fastset(datapin, loval);
 			FastPin<CLOCK_PIN>::fastset(clockpin, hiclock); CLOCK_HI_DELAY;
 			FastPin<CLOCK_PIN>::fastset(clockpin, loclock); CLOCK_LO_DELAY;
@@ -178,7 +190,7 @@ private:
 			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclockhi); CLOCK_HI_DELAY;
 			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo); CLOCK_LO_DELAY;
 		} else {
-			// NOP;
+			// FL_NOP;
 			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo);
 			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclockhi); CLOCK_HI_DELAY;
 			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo); CLOCK_LO_DELAY;
