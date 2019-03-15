@@ -40,9 +40,9 @@ void draw() {
 
 void serialEvent(Serial myPort) { // starts reading data from the Serial Port
 	// reads the data from the Serial Port up to the character '.' and puts it into the String variable "data".
-	data = myPort.readStringUntil('.');
-	data = data.substring(0,data.length()-1);
-	index1 = data.indexOf(":"); // find the character ',' and puts it into the variable "index1"
+	data = myPort.readStringUntil(']');
+	data = data.substring(1,data.length()-1);
+	index1 = data.indexOf(","); // find the character ',' and puts it into the variable "index1"
 	angle= data.substring(0, index1); // read the data from position "0" to position of the variable index1 or thats the value of the angle the Arduino Board sent into the Serial Port
 	distance= data.substring(index1+1, data.length()); // read the data from position "index1" to the end of the data pr thats the value of the distance
 	// converts the String variables into Integer

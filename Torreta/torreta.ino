@@ -2,7 +2,7 @@
 #include <Servo.h>
 
 // SERVO configuration
-const int PIN_SERVO 			= 4;
+const int PIN_SERVO 			= 5;
 const int SERVO_MIN_ANGLE 		= 0;	//Servo minimun angle value
 const int SERVO_CENTER_ANGLE 	= 90;	//Servo angle centered
 const int SERVO_MAX_ANGLE 		= 180;	//Servo maximun angle value
@@ -15,36 +15,36 @@ int lastServoAngle				= 0;
 Servo myServo;
 
 // SONAR configuration
-const int PIN_SONAR_TRIGGER 	= 5;
-const int PIN_SONAR_ECHO 		= 6;
+const int PIN_SONAR_TRIGGER 	= 6;
+const int PIN_SONAR_ECHO 		= 7;
 int distance 					= 0;
 int lastDistance 				= 0;
 
 // PIEZO configuration
-const int PIN_PIEZO 			= 3;
+const int PIN_PIEZO 			= 4;
 const int PIEZO_MIN_FREQ 		= 100;		//Buzzer minimun working frequency
 const int PIEZO_MAX_FREQ 		= 50000;	//Buzzer maximun audible working frequency
 
 // Switches
-const int PIN_SWITCH_MASTER 	= 1;
+const int PIN_SWITCH_MASTER 	= 2;
 bool switchMaster 				= false;
 bool lastMasterState 			= false;
-const int PIN_SWITCH_AUTO 		= 2;
+const int PIN_SWITCH_AUTO 		= 3;
 bool switchAuto 				= false;
 bool lastAutoState 				= false;
 
 // Controllers
-const int PIN_BUTTON_LEFT 		= 7;
+const int PIN_BUTTON_LEFT 		= 8;
 bool turnLeft 					= false;
-const int PIN_BUTTON_RIGHT 		= 8;
+const int PIN_BUTTON_RIGHT 		= 9;
 bool turnRight 					= false;
 
 // Launchers
-const int PIN_LAUNCHERS[] 		= { 9, 10, 11, 12 };
+const int PIN_LAUNCHERS[] 		= { 10, 11, 12, 13 };
 bool enabledLaunchers[] 		= { false, false, false, false };
 
 // Data
-bool debug = true;
+bool debug = false;
 byte flags = 0;
 
 
@@ -61,7 +61,6 @@ void setup() {
 	pinMode(PIN_BUTTON_LEFT, INPUT);
 	pinMode(PIN_BUTTON_RIGHT, INPUT);
 	configureLaunchers();
-	servoResetPosition();
 	doNoise(5000, 50, 150, 2);
 }
 
@@ -69,9 +68,9 @@ void setup() {
 void loop() {
 	updateCurrentStatus();
 	checkChanges();
-	if(switchMaster || debug) {
-		// MASTER on
-		if(switchAuto || debug) {
+	if(switchMaster) {
+		// MASTER on  
+		if(switchAuto) {
 			// AUTO mode
 			doStep();
 			updateServoAngle();
@@ -82,7 +81,7 @@ void loop() {
 		}
 	} else {
 		// MASTER off
-		servoStartPosition();
+		servoResetPosition();
 		sendSerialData();
 	}
 }
@@ -92,8 +91,8 @@ void updateCurrentStatus() {
 	lastMasterState = switchMaster;
 	lastAutoState = switchAuto;
 	// Read and save current status
-	switchMaster = digitalRead(PIN_SWITCH_MASTER);
-	switchAuto = digitalRead(PIN_SWITCH_AUTO);
+	switchMaster = debug || digitalRead(PIN_SWITCH_MASTER);
+	switchAuto = debug || digitalRead(PIN_SWITCH_AUTO);
 }
 
 void checkChanges() {
@@ -101,6 +100,9 @@ void checkChanges() {
 	if(switchMaster && !lastMasterState) {
 		setServoAngle(SERVO_MIN_ANGLE);
 	}
+  if(!switchMaster) {
+    distance = 0;
+  }
 }
 
 void configureLaunchers() {
@@ -132,12 +134,11 @@ void doStep() {
 }
 
 void sendSerialData() {
-	// Serial.print(flags);
-	// Serial.print(':');
+	Serial.print("[");
 	Serial.print(servoAngle);
-	Serial.print(':');
+	Serial.print(',');
 	Serial.print(distance);
-	Serial.print('.');
+	Serial.print(']');
 }
 
 void updateServoAngle() {
