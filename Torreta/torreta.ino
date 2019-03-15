@@ -6,11 +6,12 @@ const int PIN_SERVO 			= 4;
 const int SERVO_MIN_ANGLE 		= 0;	//Servo minimun angle value
 const int SERVO_CENTER_ANGLE 	= 90;	//Servo angle centered
 const int SERVO_MAX_ANGLE 		= 180;	//Servo maximun angle value
-const int SERVO_STEP 			= 1;	//Servo step size (in degrees)
+const int SERVO_STEP_ANGLE 		= 1;	//Servo step size (in degrees)
+const int SERVO_STEP_DELAY		= 30;	//Servo step delay (in ms)
 const int SERVO_START_POSITION 	= 0;	//Servo start angle
 bool servoDirection 			= 1;	// 0:left 1:right
-int angle 						= 0;
-int lastAngle 					= 0;
+int servoAngle					= 0;
+int lastServoAngle				= 0;
 Servo myServo;
 
 // SONAR configuration
@@ -39,10 +40,11 @@ const int PIN_BUTTON_RIGHT 		= 8;
 bool turnRight 					= false;
 
 // Launchers
-const int PIN_LAUNCHERS 		= [ 9, 10, 11, 12 ];
-bool enabledLaunchers 			= [ false, false, false, false ];
+const int PIN_LAUNCHERS[] 		= { 9, 10, 11, 12 };
+bool enabledLaunchers[] 		= { false, false, false, false };
 
 // Data
+bool debug = true;
 byte flags = 0;
 
 
@@ -67,9 +69,9 @@ void setup() {
 void loop() {
 	updateCurrentStatus();
 	checkChanges();
-	if(switchMaster) {
+	if(switchMaster || debug) {
 		// MASTER on
-		if(switchAuto) {
+		if(switchAuto || debug) {
 			// AUTO mode
 			doStep();
 			updateServoAngle();
@@ -80,7 +82,7 @@ void loop() {
 		}
 	} else {
 		// MASTER off
-		startPosition();
+		servoStartPosition();
 		sendSerialData();
 	}
 }
@@ -102,37 +104,37 @@ void checkChanges() {
 }
 
 void configureLaunchers() {
-	pinMode(PIN_LAUNCHER_1, OUTPUT);
-	pinMode(PIN_LAUNCHER_2, OUTPUT);
-	pinMode(PIN_LAUNCHER_3, OUTPUT);
-	pinMode(PIN_LAUNCHER_4, OUTPUT);
-	digitalWrite(PIN_LAUNCHER_1, launcher1Enabled);
-	digitalWrite(PIN_LAUNCHER_2, launcher2Enabled);
-	digitalWrite(PIN_LAUNCHER_3, launcher3Enabled);
-	digitalWrite(PIN_LAUNCHER_4, launcher4Enabled);
+	pinMode(PIN_LAUNCHERS[0], OUTPUT);
+	pinMode(PIN_LAUNCHERS[1], OUTPUT);
+	pinMode(PIN_LAUNCHERS[2], OUTPUT);
+	pinMode(PIN_LAUNCHERS[3], OUTPUT);
+	digitalWrite(PIN_LAUNCHERS[0], enabledLaunchers[0]);
+	digitalWrite(PIN_LAUNCHERS[1], enabledLaunchers[1]);
+	digitalWrite(PIN_LAUNCHERS[2], enabledLaunchers[2]);
+	digitalWrite(PIN_LAUNCHERS[3], enabledLaunchers[3]);
 }
 
 void servoStartPosition() {
 	setServoAngle(SERVO_MIN_ANGLE);
-	lastAngle = SERVO_MIN_ANGLE;
+	lastServoAngle = SERVO_MIN_ANGLE;
 }
 
 void servoResetPosition() {
 	setServoAngle(SERVO_CENTER_ANGLE);
-	lastAngle = SERVO_CENTER_ANGLE;
+	lastServoAngle = SERVO_CENTER_ANGLE;
 }
 
 void doStep() {
-	setServoAngle(angle)
-	delay(30);
-	doPulse()
+	setServoAngle(servoAngle);
+	delay(SERVO_STEP_DELAY);
+	doSonarPulse();
 	sendSerialData();
 }
 
 void sendSerialData() {
-	Serial.print(flags);
-	Serial.print(':');
-	Serial.print(angle);
+	// Serial.print(flags);
+	// Serial.print(':');
+	Serial.print(servoAngle);
 	Serial.print(':');
 	Serial.print(distance);
 	Serial.print('.');
@@ -140,26 +142,28 @@ void sendSerialData() {
 
 void updateServoAngle() {
 	if(servoDirection) {
-		servoAngle += SERVO_STEP;
+		servoAngle = servoAngle + SERVO_STEP_ANGLE;
 	} else {
-		servoAngle -= SERVO_STEP;
+		servoAngle = servoAngle - SERVO_STEP_ANGLE;
 	}
-	if(angle <= SERVO_MIN_ANGLE) {
-		angle = SERVO_MIN_ANGLE;
+	if(servoAngle <= SERVO_MIN_ANGLE) {
+		servoAngle = SERVO_MIN_ANGLE;
 		servoDirection = 1;
-	} else if(angle >= SERVO_MAX_ANGLE) {
-		angle = SERVO_MAX_ANGLE;
+	} else if(servoAngle >= SERVO_MAX_ANGLE) {
+		servoAngle = SERVO_MAX_ANGLE;
 		servoDirection = 0;
 	}
 }
 
-void setServoAngle(int newAngle) {
-	myServo.write(newAngle);
-	lastAngle = angle;
-	angle = newAngle;
+void setServoAngle(int newServoAngle) {
+	if (lastServoAngle != newServoAngle) {
+		myServo.write(newServoAngle);
+		lastServoAngle = servoAngle;
+		servoAngle = newServoAngle;
+	}
 }
 
-void doPulse() {
+void doSonarPulse() {
 	long duration = 0;
 	digitalWrite(PIN_SONAR_TRIGGER, LOW);
 	delayMicroseconds(2);
@@ -167,7 +171,7 @@ void doPulse() {
 	delayMicroseconds(10);
 	digitalWrite(PIN_SONAR_TRIGGER, LOW);
 	duration = pulseIn(PIN_SONAR_ECHO, HIGH);
-	lastDistance = distance
+	lastDistance = distance;
 	distance = duration * 0.034 / 2;
 }
 
