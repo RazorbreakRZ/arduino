@@ -37,10 +37,16 @@ class Speedometer {
     stroke(0, 255, 0);
     ellipse(centerX, centerY, radiusA, radiusA);
     // Ball
+    pushMatrix();
     ellipseMode(CENTER);
+    rectMode(CENTER);
     fill(0, 255, 0);
     stroke(0, 255, 0);
-    ellipse(centerX, centerY, radiusB, radiusB);
+    translate(centerX, centerY);
+    rotate(radians(data.speed%360));
+    ellipse(0, 0, radiusB, radiusB);
+    rect(0, 0, radiusA*0.98, radiusB*0.5);
+    popMatrix();
     // Text
     fill(0, 255, 0);
     textFont(f, textSize);

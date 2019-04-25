@@ -22,7 +22,7 @@ class Data {
     switch(mode){
       case SENSOR:
         retrieveDataFromSerialPort();
-      break;
+        break;
       default:
         simulateData();
     }
@@ -33,9 +33,9 @@ class Data {
   }
   
   void simulateData() {
-    time = (time + 1) % 5999;
-    direction = (direction + 1) % 360;
-    speed = (speed + 1) % 9999;
+    time = millis()/1000;
+    direction = (direction + 5) % 360;
+    speed = (speed + 5) % 9999;
     energy = (energy + 1) % 100;
   }
   
