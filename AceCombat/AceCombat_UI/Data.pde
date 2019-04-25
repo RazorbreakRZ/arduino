@@ -33,9 +33,9 @@ class Data {
   }
   
   void simulateData() {
-    time = millis()/1000;
-    direction = (direction + 5) % 360;
-    speed = (speed + 5) % 9999;
+    time = (millis()/1000) % 5999;
+    direction = (direction + 1) % 360;
+    speed = (speed + 10) % 9999;
     energy = (energy + 1) % 100;
   }
   
