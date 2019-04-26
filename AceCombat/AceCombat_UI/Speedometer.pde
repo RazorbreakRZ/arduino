@@ -7,16 +7,16 @@ class Speedometer {
   
   Speedometer() {
     mode = CORNER;
-    rectWidth = width*0.2;
-    rectHeight = rectWidth*0.25;
-    pointAX = width*0.05;
-    pointAY = height*0.5;
+    rectWidth = width*0.22;
+    rectHeight = height*0.08;
+    pointAX = width*0.08;
+    pointAY = height*0.45;
     radiusA = rectHeight*1.25;
     radiusB = rectHeight*0.4;
     centerX = pointAX;
     centerY = pointAY + rectHeight*0.5;
     textSize = rectHeight;
-    textX = pointAX + rectWidth*0.9;
+    textX = pointAX + rectWidth*0.95;
     textY = pointAY + rectHeight*0.85;
   }
   

@@ -9,6 +9,7 @@ class Data {
   int time;
   int speed;
   int energy;
+  int altitude;
   
   Data(int mode) {
     this.mode = mode;
@@ -16,6 +17,7 @@ class Data {
     time = 0;
     speed = 0;
     energy = 0;
+    altitude = 0;
   }
   
   void refresh() {
@@ -37,6 +39,7 @@ class Data {
     direction = (direction + 1) % 360;
     speed = (speed + 10) % 9999;
     energy = (energy + 1) % 100;
+    altitude = (altitude + 1) % 9999;
   }
   
 }

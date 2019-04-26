@@ -9,7 +9,7 @@ Hud hud;
 // Initialization
 void setup() {
   size(800, 600);
-  frameRate(60);
+  frameRate(30);
   background(bgcolor);
   f = createFont("Consolas", 16, true);
   hud = new Hud();

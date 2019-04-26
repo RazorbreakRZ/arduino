@@ -1,3 +1,4 @@
 *.ino.*
 *_TMP
 *.windows*/
+*.tmp
