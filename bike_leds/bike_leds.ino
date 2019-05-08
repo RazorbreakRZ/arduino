@@ -84,21 +84,21 @@ void setup() {
 ///////////////
 bool debug = true;
 void loop() {
-  if(debug || digitalRead(PIN_BUTTON)==HIGH){
-    for(int i=0; i<MAX_STRIPS; i++) {
-      powerOn(i, true);
-    }
-    delay(10000);
-    for(int i=0; i<MAX_STRIPS; i++) {
-      powerOff(i, true);
-    }
-    delay(5000);
-  }
+  setPowerAll(true);
 }
 
 ///////////
 // UTILS //
 ///////////
+void setPowerAll(bool setOn) {
+  for(int i=0; i<MAX_STRIPS; i++) {
+    if(setOn)
+      powerOn(i, true);
+    else
+      powerOff(i, true);
+  }
+}
+
 void powerOn(unsigned int index, bool refresh){
   setStripColor(index, color[stripCfg[index][LEDS_COLOR]], refresh);
 }
