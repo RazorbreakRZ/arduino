@@ -43,7 +43,6 @@ int stripCfg[][3] = {
   { 7, 14, ORANGE }, // LEFT
   { 8, 14, ORANGE } // RIGHT
 };
-#define MAX_STRIPS 4
 
 // STRIP OBJECT
 Adafruit_NeoPixel strip[] = {
@@ -52,6 +51,7 @@ Adafruit_NeoPixel strip[] = {
   Adafruit_NeoPixel(stripCfg[LEFT][LEDS_TOTAL], stripCfg[LEFT][PIN_STRIP], NEO_GRB + NEO_KHZ800), // LEFT
   Adafruit_NeoPixel(stripCfg[RIGHT][LEDS_TOTAL], stripCfg[RIGHT][PIN_STRIP], NEO_GRB + NEO_KHZ800) // RIGHT
 };
+#define MAX_STRIPS (sizeof(strip)/sizeof(strip[0]))
 
 uint32_t color[] = {
   strip[0].Color(PIXEL_MIN_INTENSITY, PIXEL_MIN_INTENSITY, PIXEL_MIN_INTENSITY), // BLACK
@@ -100,16 +100,16 @@ void loop() {
 // UTILS //
 ///////////
 void powerOn(unsigned int index, bool refresh){
-  for(int i=0; i<stripCfg[index][LEDS_TOTAL]; i++){
-    strip[index].setPixelColor(i, color[stripCfg[index][LEDS_COLOR]]);
-  }
-  if(refresh)
-    strip[index].show();
+  setStripColor(index, color[stripCfg[index][LEDS_COLOR]], refresh);
 }
 
 void powerOff(unsigned int index, bool refresh){
+  setStripColor(index, color[BLACK], refresh);
+}
+
+void setStripColor(unsigned int index, uint32_t color, bool refresh) {
   for(int i=0; i<stripCfg[index][LEDS_TOTAL]; i++){
-    strip[index].setPixelColor(i, color[BLACK]);
+    strip[index].setPixelColor(i, color);
   }
   if(refresh)
     strip[index].show();
