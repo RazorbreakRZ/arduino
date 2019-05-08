@@ -74,7 +74,7 @@ void setup() {
   randomSeed(analogRead(0));
   for (int i=0; i<MAX_STRIPS; i++) {
     strip[i].begin();
-    strip[i].show();
+    setStripColor(i, color[GREEN], true);
   }
   delay(TIME_DELAY);
 }
