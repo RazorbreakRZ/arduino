@@ -2,3 +2,9 @@
 *_TMP
 *.windows*/
 *.tmp
+.vscode/
+modes/
+test/
+tools/
+templates/
+examples/
