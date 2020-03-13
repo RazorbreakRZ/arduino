@@ -1,5 +1,4 @@
 #include <Adafruit_NeoPixel.h>
-#include <math.h>
 
 // General program configuration
 #define TIME_DELAY            1000
@@ -29,19 +28,22 @@
 #define BRAKE 1
 #define LEFT 2
 #define RIGHT 3
+#define DOWN 4
 
 // STRIP CONFIG
 #define PIN_STRIP 0
 #define LEDS_TOTAL 1
 #define LEDS_COLOR 2
+#define PIN_ACTIVATION 3
 
 // STRIP CONFIG OBJECT
-int stripCfg[][3] = { 
-  //{ PIN_STRIP, LEDS_TOTAL, LEDS_COLOR }
-  { 5, 20, WHITE }, // FRONT
-  { 6, 25, RED }, // BRAKE
-  { 7, 14, ORANGE }, // LEFT
-  { 8, 14, ORANGE } // RIGHT
+int stripCfg[][4] = { 
+  //{ PIN_STRIP, LEDS_TOTAL, LEDS_COLOR, PIN_ACTIVATION }
+  { 8, 10, WHITE, 1 }, // FRONT
+  { 9, 25, RED, 2 }, // BRAKE
+  { 9, 25, ORANGE, 3 }, // LEFT
+  { 9, 25, ORANGE, 4 }, // RIGHT
+  { 7, 30, GREEN, 5 } // DOWN
 };
 
 // STRIP OBJECT
@@ -49,7 +51,8 @@ Adafruit_NeoPixel strip[] = {
   Adafruit_NeoPixel(stripCfg[FRONT][LEDS_TOTAL], stripCfg[FRONT][PIN_STRIP], NEO_GRB + NEO_KHZ800), // FRONT
   Adafruit_NeoPixel(stripCfg[BRAKE][LEDS_TOTAL], stripCfg[BRAKE][PIN_STRIP], NEO_GRB + NEO_KHZ800), // BRAKE
   Adafruit_NeoPixel(stripCfg[LEFT][LEDS_TOTAL], stripCfg[LEFT][PIN_STRIP], NEO_GRB + NEO_KHZ800), // LEFT
-  Adafruit_NeoPixel(stripCfg[RIGHT][LEDS_TOTAL], stripCfg[RIGHT][PIN_STRIP], NEO_GRB + NEO_KHZ800) // RIGHT
+  Adafruit_NeoPixel(stripCfg[RIGHT][LEDS_TOTAL], stripCfg[RIGHT][PIN_STRIP], NEO_GRB + NEO_KHZ800), // RIGHT
+  Adafruit_NeoPixel(stripCfg[DOWN][LEDS_TOTAL], stripCfg[DOWN][PIN_STRIP], NEO_GRB + NEO_KHZ800) // DOWN
 };
 #define MAX_STRIPS (sizeof(strip)/sizeof(strip[0]))
 
@@ -66,17 +69,32 @@ uint32_t color[] = {
   strip[0].Color(PIXEL_INTENSITY, PIXEL_MIN_INTENSITY, PIXEL_INTENSITY*0.2)      // PINK
 };
 
+////////////////
+// ANIMATIONS //
+////////////////
+void animLoadingBar(int stripIndex, int colorIndex, int animDuration){
+  int deltaTime = animDuration / stripCfg[stripIndex][LEDS_TOTAL];
+  for(int led=0; led<stripCfg[stripIndex][LEDS_TOTAL]; led++) {
+    strip[stripIndex].setPixelColor(led, color[colorIndex]);
+    strip[stripIndex].show();
+    delay(deltaTime);
+  }
+}
+
+void animPulsating(int stripIndex, int colorIndex) {
+  for(int led=0; led<stripCfg[stripIndex][LEDS_TOTAL]; led++) {
+    strip[stripIndex].setPixelColor(led, color[colorIndex]);
+    strip[stripIndex].show();
+    delay(1000);
+  }
+}
 
 ////////////////////////////////
 // Program pre-initialization //
 ////////////////////////////////
 void setup() {
-  randomSeed(analogRead(0));
-  for (int i=0; i<MAX_STRIPS; i++) {
-    strip[i].begin();
-    setStripColor(i, color[GREEN], true);
-  }
-  delay(TIME_DELAY);
+  strip[DOWN].begin();
+  animLoadingBar(DOWN, GREEN, 1500);
 }
 
 ///////////////
@@ -84,38 +102,6 @@ void setup() {
 ///////////////
 bool debug = true;
 void loop() {
-  setPowerAll(true);
+  delay(1000);
 }
 
-///////////
-// UTILS //
-///////////
-void setPowerAll(bool setOn) {
-  for(int i=0; i<MAX_STRIPS; i++) {
-    if(setOn)
-      powerOn(i, true);
-    else
-      powerOff(i, true);
-  }
-}
-
-void powerOn(unsigned int index, bool refresh){
-  setStripColor(index, color[stripCfg[index][LEDS_COLOR]], refresh);
-}
-
-void powerOff(unsigned int index, bool refresh){
-  setStripColor(index, color[BLACK], refresh);
-}
-
-void setStripColor(unsigned int index, uint32_t color, bool refresh) {
-  for(int i=0; i<stripCfg[index][LEDS_TOTAL]; i++){
-    strip[index].setPixelColor(i, color);
-  }
-  if(refresh)
-    strip[index].show();
-}
-
-////////////////
-// ANIMATIONS //
-////////////////
-// TODO: Create strip animations here
