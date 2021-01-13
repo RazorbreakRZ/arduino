@@ -8,6 +8,7 @@ class Map {
   float textBX, textBY, textBSize;
   
   Map(){
+    println("Loading Map module...");
     mode = CENTER;
     diameter = width*0.2;
     centerX = width*0.05 + diameter*0.5;
@@ -26,6 +27,7 @@ class Map {
     textBSize = height*0.05;
     textBX = centerX - diameter*0.48;
     textBY = centerY - diameter*0.35;
+    println("Map ready!");
   }
   
   String formatDirection(int direction) {

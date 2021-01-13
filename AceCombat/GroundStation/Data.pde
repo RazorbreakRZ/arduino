@@ -12,12 +12,21 @@ class Data {
   int altitude;
   
   Data(int mode) {
+    println("Loading Data module...");
     this.mode = mode;
     direction = 0;
     time = 0;
     speed = 0;
     energy = 0;
     altitude = 0;
+    switch(this.mode){
+      case SENSOR:
+        println("Real data mode");
+        break;
+      case DUMMY:
+        println("Dummy data mode");
+    }
+    println("Data ready!");
   }
   
   void refresh() {

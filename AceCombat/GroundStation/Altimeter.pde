@@ -9,6 +9,7 @@ class Altimeter {
   float displacement, size;
 
   Altimeter() {
+    println("Loading Altimeter module...");
     mode = CORNER;
     rectWidth = width*0.18;
     rectHeight = height*0.08;
@@ -32,6 +33,7 @@ class Altimeter {
     altIndicator[1] = new PVector(pointBX*0.99, altIndicator[0].y);
     altIndicator[2] = new PVector(width*0.97, altIndicator[0].y);
     altIndicator[3] = new PVector(width, altIndicator[0].y);
+    println("Altimeter ready!");
   }
   
   void draw() {

@@ -6,6 +6,7 @@ class Timer {
   float textX, textY, textSize;
   
   Timer(){
+    println("Loading Timer module...");
     mode = CORNER;
     rectWidth = width*0.2;
     rectHeight = rectWidth*0.25;
@@ -17,6 +18,7 @@ class Timer {
     textSize = rectHeight;
     textX = pointAX + rectWidth*0.98;
     textY = pointAY + rectHeight*0.9;
+    println("Timer ready!");
   }  
   
   String formatTimer(int time) {

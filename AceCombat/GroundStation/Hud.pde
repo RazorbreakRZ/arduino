@@ -7,11 +7,13 @@ class Hud {
   Energy energy;
   
   Hud(){
+    println("Loading Hud module...");
     map = new Map();
     timer = new Timer();
     speedometer = new Speedometer();
     altimeter = new Altimeter();
     energy = new Energy();
+    println("Hud ready!");
   }
   
   void drawLimits() {

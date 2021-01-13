@@ -6,6 +6,7 @@ class Speedometer {
   float textX, textY, textSize;
   
   Speedometer() {
+    println("Loading Speedometer module...");
     mode = CORNER;
     rectWidth = width*0.22;
     rectHeight = height*0.08;
@@ -18,6 +19,7 @@ class Speedometer {
     textSize = rectHeight;
     textX = pointAX + rectWidth*0.95;
     textY = pointAY + rectHeight*0.85;
+    println("Speedometer ready!");
   }
   
   void draw() {
