@@ -2,17 +2,19 @@
 #include <math.h>
 
 // BOARD PIN configuration
-//#define PIN_DETECTOR    A0
-#define PIN_PIEZO       3
 #define PIN_PIXEL       6
-#define PIN_PIR         7
+#define PIN_START 12
+#define PIN_ANIM 8
+#define PIN_COLOR 9
+#define PIN_INC_INT 10
+#define PIN_DEC_INT 11
 
 // PIEZO configuration
 #define PIEZO_MIN_FREQ  100       //Buzzer minimum working frequency
 #define PIEZO_MAX_FREQ  50000     //Buzzer maximum audible working frequency
 
 // LED STRIP configuration
-#define PIXEL_TOTAL           60              //Total number of pixels
+#define PIXEL_TOTAL           120              //Total number of pixels
 #define PIXEL_MIN             0
 #define PIXEL_MAX             (PIXEL_TOTAL-1) //Position of the last available pixel
 #define PIXEL_MIN_INTENSITY   0
@@ -46,52 +48,67 @@ int detection = 0;
 ////////////////////////////////
 void setup() {
   randomSeed(analogRead(0));
-  Serial.begin(9600);
-  //Serial.println("---Loading application---");  
-  //Serial.println("LEDs [Initializing]");
+
   strip.begin();
   strip.show();
-  loadingPixelsAnimation(1,GREEN);
+  //loadingPixelsAnimation(1,GREEN);
   delay(TIME_DELAY);
   resetStrip();
-  //Serial.println("LEDs [Ready]");
-  //makeNoise(2000,10,500,1);
-  //Serial.println("---Starting main application---");  
-  pinMode(PIN_PIR, INPUT);
+
+//  pinMode(PIN_START, INPUT_PULLUP);
+//  pinMode(PIN_ANIM, INPUT_PULLUP);
+//  pinMode(PIN_COLOR, INPUT_PULLUP);
+//  pinMode(PIN_INC_INT, INPUT_PULLUP);
+//  pinMode(PIN_DEC_INT, INPUT_PULLUP);
 }
+
 
 ///////////////
 // Main loop //
 ///////////////
-unsigned long time;
-bool debug = true;
-int animation;
+bool start = true;
+int animation = 1;
 void loop() {
-  if(debug || digitalRead(PIN_PIR)==HIGH){
-    time = millis();
-    if(!debug){
-      animation = random(0,3);
-    }else{
-      animation = 0;
-    }
-    do{
-      switch(animation){
-        case 0:
-          animPingPong(CYAN,5,1);
-          break;
-        case 1:
-          animPulsating(PINK,PIXEL_INTENSITY/4,PIXEL_INTENSITY,5,20);
-          break;
-        case 2:
-          animWater(PINK);
-          break;
-        default:
-          resetStrip();
-          break;
-      }
-    }while(millis()-time<15000);
-    resetStrip();
+  //checkInputs();
+  switch(animation){
+    case 0:
+      animPingPong(colors[colorIndex],5,1);
+      break;
+    case 1:
+      animPulsating(CYAN,0,PIXEL_INTENSITY,2,90);
+      break;
+    case 2:
+      animWater(colors[colorIndex]);
+      break;
+    default:
+      resetStrip();
+      delay(500);
+      break;
   }
+}
+
+void checkInputs(){
+  if(digitalRead(PIN_START) == LOW){
+    start = !start;
+    delay(50);
+  };
+  if(start){
+      if(digitalRead(PIN_COLOR == LOW)){
+        rotateColor(true);
+        delay(50);
+      };
+      if(digitalRead(PIN_ANIM) == LOW){
+        resetStrip();
+        animation = random(0,3);
+        delay(50);
+      };
+      if(animation == 9){
+        animation = 1;
+      };
+  }else{
+    animation = 9;
+  };
+  delay(50);
 }
 
 // Efecto lluvia
@@ -121,14 +138,12 @@ void animPulsating(uint32_t colour, int LOW_INTENSITY, int HIGH_INTENSITY, int D
   float R = (float)(colour>>16 & 255)/PIXEL_INTENSITY;
   float G = (float)(colour>>8 & 255)/PIXEL_INTENSITY;
   float B = (float)(colour & 255)/PIXEL_INTENSITY;
-  //Serial.print("(");Serial.print(R);Serial.print(",");Serial.print(G);Serial.print(",");Serial.print(B);Serial.println(")");
   int cR,cG,cB;
   for(int i=LOW_INTENSITY;i<=HIGH_INTENSITY;i++){    
     cR = round(R*i);
     cG = round(G*i);
     cB = round(B*i);
     setRangeOfPixels(strip.Color(cR,cG,cB), PIXEL_MIN, PIXEL_MAX, DENSITY, true);
-    //Serial.print(cR);Serial.print(",");Serial.print(cG);Serial.print(",");Serial.println(cB);
     delay(s);
   }
   for(int i=HIGH_INTENSITY;i>=LOW_INTENSITY;i--){
@@ -136,7 +151,6 @@ void animPulsating(uint32_t colour, int LOW_INTENSITY, int HIGH_INTENSITY, int D
     cG = round(G*i);
     cB = round(B*i);
     setRangeOfPixels(strip.Color(cR,cG,cB), PIXEL_MIN, PIXEL_MAX, DENSITY, true);
-    //Serial.print(cR);Serial.print(",");Serial.print(cG);Serial.print(",");Serial.println(cB);
     delay(s);
   }
   
@@ -255,7 +269,6 @@ int calculateColorPercentage(int pixel, int index){
 
 // Simulates a loading animation of a single color. Useful for test the strip.
 void loadingPixelsAnimation(int activationDelay, uint32_t colorValue){
-  Serial.print("Call loadingPixelsAnimation(");Serial.print(activationDelay);Serial.println(")");
   for(int i=PIXEL_MIN; i<=PIXEL_MAX; i++){
     strip.setPixelColor(i, colorValue);
     strip.show();
@@ -265,19 +278,8 @@ void loadingPixelsAnimation(int activationDelay, uint32_t colorValue){
 
 // change the colour of the strip based on the constant list defined on the top
 void rotateColor(bool next){
-  Serial.print("Call rotateColor(");Serial.print(next);Serial.println(")");
   if(next)
     colorIndex = (colorIndex+1>colorTop ? 0 : colorIndex+1);
   else
     colorIndex = (colorIndex-1<0 ? colorTop : colorIndex-1);
-}
-
-/////////////////////////
-// Auxiliary functions //
-/////////////////////////
-void makeNoise(int frequency, int duration, int wait, int times){
-  for(int i=0;i<times;i++){
-    tone(PIN_PIEZO,frequency,duration);
-    delay(wait);
-  }
 }
