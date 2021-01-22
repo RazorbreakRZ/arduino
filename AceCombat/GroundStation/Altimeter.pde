@@ -42,7 +42,7 @@ class Altimeter {
     displacement = 0;
     for(int i=0; i<nhline; i++){
       displacement = i*rectVHeight/nhline;
-      size = rectVWidth*((i-data.altitude)%nlhline==0 ? 0.5 : 0.75);
+      size = rectVWidth*((i-telemetry.altitude)%nlhline==0 ? 0.5 : 0.75);
       line(hline[0].x + size, hline[0].y + displacement, hline[1].x, hline[1].y + displacement);
     }
     line(altIndicator[0].x, altIndicator[0].y, altIndicator[1].x, altIndicator[1].y);
@@ -61,7 +61,7 @@ class Altimeter {
     fill(0, 255, 0);
     textFont(f, textSize);
     textAlign(RIGHT);
-    text(data.altitude, textX, textY);
+    text(telemetry.altitude, textX, textY);
   }
   
 }

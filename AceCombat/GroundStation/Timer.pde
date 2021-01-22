@@ -47,7 +47,7 @@ class Timer {
     fill(0, 255, 0);
     textFont(f, textSize);
     textAlign(RIGHT);
-    text(formatTimer(data.time), textX, textY);
+    text(formatTimer(telemetry.time), textX, textY);
   }
   
 }

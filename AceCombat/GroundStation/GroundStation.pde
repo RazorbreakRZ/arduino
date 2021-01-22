@@ -1,11 +1,15 @@
 
+
+// Constants
+static final int SENSOR = 0;
+static final int DUMMY = 1;
+
 // Global vars
 int tinit;
-int bgcolor = 96;
+int bgcolor = 0;
 PFont f;
-Data data;
+Telemetry telemetry;
 Hud hud;
-//Capture cam;
 Video video;
 
 // Initialization
@@ -15,25 +19,17 @@ void setup() {
   frameRate(30);
   background(bgcolor);
   f = createFont("Consolas", 16, true);
-  data = new Data(DUMMY);
+  telemetry = new Telemetry(this, DUMMY);
   hud = new Hud();
-  video = new Video(this);
-  //cam = new Capture(this);
-  //cam.start();
+  video = new Video(this, DUMMY);
   tinit = millis();
+  
 }
 
 // Main loop
 void draw() {
   background(bgcolor);
-  data.refresh();
-  //image(cam, 0, 0);
+  telemetry.refresh();
   video.draw();
   hud.draw();
 }
-
-/*
-void captureEvent(Capture cam) {
-  cam.read();
-}
-*/

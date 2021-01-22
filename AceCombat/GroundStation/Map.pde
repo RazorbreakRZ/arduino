@@ -59,20 +59,20 @@ class Map {
     fill(0, 255, 0);
     textFont(f, textASize);
     textAlign(LEFT);
-    text(formatDirection(data.direction), textAX, textAY);
-    fill(255);
+    text(formatDirection(telemetry.direction), textAX, textAY); // Heading degrees
+    fill(0);
     textFont(f, textBSize);
     textAlign(LEFT);
-    text((cos(radians(data.direction))>=0?"N":"S"), textBX, textBY);
+    text((cos(radians(telemetry.direction))>=0?"N":"S"), textBX, textBY); // North-South letter
     // Triangle
     pushMatrix();
     fill(255);
-    noStroke();
     translate(centerX, centerY);
-    rotate(radians(data.direction));
-    triangle(0, -10, 10, 10, -10, 10);
+    rotate(radians(telemetry.direction));
     stroke(0, 255, 0, 192);
     line(0, 0, 0, -diameter*0.5);
+    noStroke();
+    triangle(0, -10, 10, 10, -10, 10);
     popMatrix();
   }
   

@@ -45,7 +45,7 @@ class Speedometer {
     fill(0, 255, 0);
     stroke(0, 255, 0);
     translate(centerX, centerY);
-    rotate(radians(data.speed%360));
+    rotate(radians(telemetry.speed%360));
     ellipse(0, 0, radiusB, radiusB);
     rect(0, 0, radiusA*0.98, radiusB*0.5);
     popMatrix();
@@ -53,7 +53,7 @@ class Speedometer {
     fill(0, 255, 0);
     textFont(f, textSize);
     textAlign(RIGHT);
-    text(data.speed, textX, textY);
+    text(telemetry.speed, textX, textY);
   }
   
 }
